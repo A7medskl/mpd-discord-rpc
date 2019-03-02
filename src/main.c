@@ -1,4 +1,5 @@
 #include "mpdclient.h"
+#include "discord.h"
 #include <stdio.h>
 #include <unistd.h>
 
@@ -17,11 +18,10 @@ int main()
         return 1;
     }
 
-    for (int i = 0; i < 5; ++i) {
-        sleep(1);
-        mpdclient_update(mpd);
-        printf("%s\n", mpdclient_get_current_song_name(mpd));
-    }
+    discord_init();
+    update_presence();
+    sleep(6);
+    Discord_Shutdown();
 
     mpdclient_free(mpd);
     return 0;
