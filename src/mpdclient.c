@@ -28,3 +28,18 @@ void mpdclient_free(struct mpdclient *mpd)
     mpd_status_free(mpd->status);
     free(mpd);
 }
+
+void mpdclient_update(struct mpdclient *mpd)
+{
+    mpd->current_song = mpd_run_current_song(mpd->connection);
+    mpd->status = mpd_run_status(mpd->connection);
+    mpd->state = mpd_status_get_state(mpd->status);
+}
+
+const char *mpdclient_get_current_song_name(struct mpdclient *mpd)
+{
+    if (mpd->state == MPD_STATE_PLAY || mpd->state == MPD_STATE_PAUSE)
+        return mpd_song_get_tag(mpd->current_song, MPD_TAG_TITLE, 0);
+    else
+        return NULL;
+}
