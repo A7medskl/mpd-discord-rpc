@@ -36,7 +36,7 @@ void mpdclient_update(struct mpdclient *mpd)
     mpd->state = mpd_status_get_state(mpd->status);
 }
 
-const char *mpdclient_get_current_song_name(struct mpdclient *mpd)
+char *mpdclient_get_current_song_name(struct mpdclient *mpd)
 {
     if (mpd->state == MPD_STATE_PLAY || mpd->state == MPD_STATE_PAUSE)
         return mpd_song_get_tag(mpd->current_song, MPD_TAG_TITLE, 0);
