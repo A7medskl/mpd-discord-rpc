@@ -1,9 +1,8 @@
 #include "discord.h"
 #include <string.h>
+#include <stdio.h>
 
 #define DISCORD_APPLICATION_ID "549019770280869901"
-
-static int SendPresence = 1;
 
 void discord_init()
 {
@@ -19,17 +18,19 @@ void discord_init()
     Discord_Initialize(DISCORD_APPLICATION_ID, &handlers, 1, 0);
 }
 
-void update_presence()
+void discord_update_song_info(char *title, char *artist, int send_presence)
 {
-    if (SendPresence) {
-        DiscordRichPresence discordPresence;
-        memset(&discordPresence, 0, sizeof(discordPresence));
-        discordPresence.details = "Track Name";
-        discordPresence.state = "By Artist";
-        discordPresence.instance = 0;
-        Discord_UpdatePresence(&discordPresence);
+    if (send_presence) {
+        char state_buffer[256];
+        sprintf(state_buffer, "by %s", artist);
+
+        DiscordRichPresence discord_presence;
+        memset(&discord_presence, 0, sizeof(discord_presence));
+        discord_presence.details = title;
+        discord_presence.state = state_buffer;
+        discord_presence.instance = 0;
+        Discord_UpdatePresence(&discord_presence);
     }
-    else {
+    else
         Discord_ClearPresence();
-    }
 }

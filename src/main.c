@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <signal.h>
+#include <unistd.h>
 
 #define MPD_DEFAULT_HOST "localhost"
 #define MPD_DEFAULT_PORT 6600
@@ -31,22 +31,24 @@ int main()
 
     if (!mpd) {
         printf("Unable to connect to MPD. Exiting...\n");
-        mpdclient_free(mpd);
         return 1;
     }
 
     discord_init();
-    update_presence();
 
     char *song_name;
+    char *artist_name;
+    int send_presence;
+
     while (!alarm_fired) {
         mpdclient_update(mpd);
+
         song_name = mpdclient_get_current_song_name(mpd);
-        if (song_name)
-            printf("%s\n", song_name);
-        else
-            printf("Nothing is playing\n");
-        sleep(5);
+        artist_name = mpdclient_get_current_song_artist(mpd);
+        send_presence = mpdclient_is_playing(mpd);
+
+        discord_update_song_info(song_name, artist_name, send_presence);
+        mpdclient_wait_for_state_change(mpd);
     }
 
     printf("Inturrupt signal detected. Closing connections...\n");
