@@ -15,6 +15,21 @@
 
 volatile sig_atomic_t alarm_fired = 0;
 
+void ding(int signum)
+{
+    alarm_fired = 1;
+}
+
+void setup_sighandlers()
+{
+    struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = ding;
+    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGQUIT, &action, NULL);
+    sigaction(SIGINT, &action, NULL);
+}
+
 int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_timeout)
 {
     int ch;
@@ -54,24 +69,13 @@ int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_tim
     return 0;
 }
 
-void ding(int signum)
-{
-    alarm_fired = 1;
-}
-
 int main(int argc, char **argv)
 {
-    struct sigaction action;
-    memset(&action, 0, sizeof(action));
-    action.sa_handler = ding;
-    sigaction(SIGTERM, &action, NULL);
-    sigaction(SIGQUIT, &action, NULL);
-    sigaction(SIGINT, &action, NULL);
+    setup_sighandlers();
 
-
+    char *mpd_host = MPD_DEFAULT_HOST;
     int mpd_port = MPD_DEFAULT_PORT;
     int mpd_timeout = MPD_DEFAULT_TIMEOUT;
-    char *mpd_host = MPD_DEFAULT_HOST;
 
     if (get_args(argc, argv, &mpd_host, &mpd_port, &mpd_timeout))
         return 1;
