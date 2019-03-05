@@ -1,6 +1,7 @@
 #include "mpdclient.h"
 #include <stdlib.h>
 #include <signal.h>
+#include <stdio.h>
 
 extern sig_atomic_t alarm_fired;
 
@@ -16,6 +17,8 @@ struct mpdclient *mpdclient_init(char *host, int port, int timeout)
         mpd->state = mpd_status_get_state(mpd->status);
     }
     else {
+        fprintf(stderr, "Error: %s\n",
+                mpd_connection_get_error_message(mpd->connection));
         mpd_connection_free(mpd->connection);
         free(mpd);
         mpd = NULL;
