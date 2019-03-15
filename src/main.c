@@ -30,6 +30,19 @@ void setup_sighandlers()
     sigaction(SIGINT, &action, NULL);
 }
 
+void print_usage()
+{
+    fprintf(stderr, "Usage:\n");
+    fprintf(stderr, "  mpd_discord_rpc [OPTION...]\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "MPD Rich Presence for Discord - Display your music in Discord.\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -h  the MPD host to connect to\n");
+    fprintf(stderr, "  -p  the MPD port to connect to\n");
+    fprintf(stderr, "  -t  the timeout for MPD\n");
+}
+
 int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_timeout)
 {
     int ch;
@@ -63,6 +76,7 @@ int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_tim
                 fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
             return 1;
         default:
+            print_usage();
             abort();
         }
     }
