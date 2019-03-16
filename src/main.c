@@ -5,6 +5,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -38,17 +39,39 @@ void print_usage()
     fprintf(stderr, "MPD Rich Presence for Discord - Display your music in Discord.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "  -h  the MPD host to connect to\n");
-    fprintf(stderr, "  -p  the MPD port to connect to\n");
-    fprintf(stderr, "  -t  the timeout for MPD\n");
+    fprintf(stderr, "  -h, --host       MPD host to connect to\n");
+    fprintf(stderr, "  -p, --port       MPD port to connect to\n");
+    fprintf(stderr, "  -t, --timeout    timeout for MPD\n");
+    fprintf(stderr, "  --help           show help options\n");
 }
 
 int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_timeout)
 {
     int ch;
-    opterr = 0;
+    static int help_flag;
 
-    while ((ch = getopt(argc, argv, "h:p:t:")) != -1) {
+    while (1) {
+        static struct option long_options[] =
+            {
+                {"host",    required_argument, 0, 'h'},
+                {"port",    required_argument, 0, 'p'},
+                {"timeout", required_argument, 0, 't'},
+                {"help",    no_argument, &help_flag, 1},
+                {0, 0, 0, 0}
+            };
+
+        int option_index = 0;
+        ch = getopt_long(argc, argv, "h:p:t:", long_options, &option_index);
+
+        if (help_flag) {
+            print_usage();
+            exit(0);
+        }
+
+        /* Detect the end of the options. */
+        if (ch == -1)
+            break;
+
         switch (ch) {
         case 'h':
             *mpd_host = optarg;
@@ -58,7 +81,7 @@ int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_tim
             if (*mpd_port == 0) {  /* Argument was non-numeric */
                 fprintf(stderr, "Invalid port number: %s\n", optarg);
                 return 1;
-            }
+            } 
             break;
         case 't':
             *mpd_timeout = atoi(optarg);
@@ -68,18 +91,15 @@ int get_args(int argc, char **argv, char **mpd_host, int *mpd_port, int *mpd_tim
             }
             break;
         case '?':
-            if (optopt == 'h' || optopt == 'p' || optopt == 't')
-                fprintf(stderr, "Option -%c requires an argument.\n", optopt);
-            else if (isprint(optopt))
-                fprintf(stderr, "Unknown option '-%c'.\n", optopt);
-            else
-                fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+            /* getopt_long will have already printed an error message. */
             return 1;
+            break;
         default:
             print_usage();
             abort();
         }
     }
+
     return 0;
 }
 
